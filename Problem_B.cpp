@@ -4,7 +4,7 @@
 #include <vector>
 const int kPrecision = 10;
 void BuildingAnswer(int requests_number,
-                    std::vector<std::pair<double, double>> requests_array,
+                    std::vector<std::pair<double, double>>& requests_array,
                     std::vector<double>& prefix_product_log) {
   for (int i = 0; i < requests_number; ++i) {
     int left = requests_array[i].first;
