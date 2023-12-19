@@ -3,78 +3,6 @@
 #include <vector>
 
 class Heap {
- private:
-  std::vector<std::pair<int, int>> min_heap_;
-  std::vector<std::pair<int, int>> max_heap_;
-  int heap_length_ = 0;
-
-  void MinSiftDown(int parent) {
-    while (2 * parent + 1 < heap_length_) {
-      int left_child = 2 * parent + 1;
-      int right_child = 2 * parent + 2;
-      int child = left_child;
-      if (right_child < heap_length_ &&
-          min_heap_[right_child] < min_heap_[left_child]) {
-        child = right_child;
-      }
-      if (min_heap_[child] < min_heap_[parent]) {
-        SwapMin(parent, child);
-        parent = child;
-      } else {
-        break;
-      }
-    }
-  }
-  void MaxSiftDown(int parent) {
-    while (2 * parent + 1 < heap_length_) {
-      int left_child = 2 * parent + 1;
-      int right_child = 2 * parent + 2;
-      int child = left_child;
-      if (right_child < heap_length_ &&
-          max_heap_[right_child] > max_heap_[left_child]) {
-        child = right_child;
-      }
-      if (max_heap_[child] > max_heap_[parent]) {
-        SwapMax(parent, child);
-        parent = child;
-      } else {
-        break;
-      }
-    }
-  }
-
-  void MinSiftUp(int child) {
-    while (child != 0) {
-      if (min_heap_[child] < min_heap_[(child - 1) / 2]) {
-        SwapMin(child, (child - 1) / 2);
-        child = (child - 1) / 2;
-      } else {
-        break;
-      }
-    }
-  }
-  void MaxSiftUp(int child) {
-    while (child != 0) {
-      if (max_heap_[child] > max_heap_[(child - 1) / 2]) {
-        SwapMax(child, (child - 1) / 2);
-        child = (child - 1) / 2;
-      } else {
-        break;
-      }
-    }
-  }
-
-  void SwapMin(int ind1, int ind2) {
-    std::swap(min_heap_[ind1], min_heap_[ind2]);
-    std::swap(max_heap_[min_heap_[ind1].second].second,
-              max_heap_[min_heap_[ind2].second].second);
-  }
-  void SwapMax(int ind1, int ind2) {
-    std::swap(min_heap_[max_heap_[ind1].second].second,
-              min_heap_[max_heap_[ind2].second].second);
-    std::swap(max_heap_[ind1], max_heap_[ind2]);
-  }
-
  public:
   void ExtractMin() {
     if (heap_length_ == 0) {
@@ -82,7 +10,7 @@ class Heap {
       return;
     }
     std::cout << min_heap_[0].first << '\n';
-    int tmp = min_heap_[0].second;
+    size_t tmp = static_cast<size_t>(min_heap_[0].second);
     SwapMin(0, heap_length_ - 1);
     SwapMax(tmp, heap_length_ - 1);
     min_heap_.pop_back();
@@ -101,7 +29,7 @@ class Heap {
       return;
     }
     std::cout << max_heap_[0].first << '\n';
-    int tmp = max_heap_[0].second;
+    size_t tmp = static_cast<size_t>(max_heap_[0].second);
     SwapMax(0, heap_length_ - 1);
     SwapMin(tmp, heap_length_ - 1);
     max_heap_.pop_back();
@@ -113,6 +41,7 @@ class Heap {
       MinSiftDown(tmp);
     }
   }
+
   void Clear() {
     max_heap_.clear();
     min_heap_.clear();
@@ -141,6 +70,77 @@ class Heap {
     MinSiftUp(heap_length_ - 1);
     MaxSiftUp(heap_length_ - 1);
   }
+
+ private:
+  void MinSiftDown(size_t parent) {
+    while (2 * parent + 1 < heap_length_) {
+      size_t left_child = 2 * parent + 1;
+      size_t right_child = 2 * parent + 2;
+      size_t child = left_child;
+      if (right_child < heap_length_ &&
+          min_heap_[right_child] < min_heap_[left_child]) {
+        child = right_child;
+      }
+      if (min_heap_[child] < min_heap_[parent]) {
+        SwapMin(parent, child);
+        parent = child;
+      } else {
+        break;
+      }
+    }
+  }
+  void MaxSiftDown(size_t parent) {
+    while (2 * parent + 1 < heap_length_) {
+      size_t left_child = 2 * parent + 1;
+      size_t right_child = 2 * parent + 2;
+      size_t child = left_child;
+      if (right_child < heap_length_ &&
+          max_heap_[right_child] > max_heap_[left_child]) {
+        child = right_child;
+      }
+      if (max_heap_[child] > max_heap_[parent]) {
+        SwapMax(parent, child);
+        parent = child;
+      } else {
+        break;
+      }
+    }
+  }
+  void MinSiftUp(size_t child) {
+    while (child != 0) {
+      if (min_heap_[child] < min_heap_[(child - 1) / 2]) {
+        SwapMin(child, (child - 1) / 2);
+        child = (child - 1) / 2;
+      } else {
+        break;
+      }
+    }
+  }
+  void MaxSiftUp(size_t child) {
+    while (child != 0) {
+      if (max_heap_[child] > max_heap_[(child - 1) / 2]) {
+        SwapMax(child, (child - 1) / 2);
+        child = (child - 1) / 2;
+      } else {
+        break;
+      }
+    }
+  }
+
+  void SwapMin(size_t ind1, size_t ind2) {
+    std::swap(min_heap_[ind1], min_heap_[ind2]);
+    std::swap(max_heap_[min_heap_[ind1].second].second,
+              max_heap_[min_heap_[ind2].second].second);
+  }
+
+  void SwapMax(size_t ind1, size_t ind2) {
+    std::swap(min_heap_[max_heap_[ind1].second].second,
+              min_heap_[max_heap_[ind2].second].second);
+    std::swap(max_heap_[ind1], max_heap_[ind2]);
+  }
+  std::vector<std::pair<int, int>> min_heap_;
+  std::vector<std::pair<int, int>> max_heap_;
+  size_t heap_length_ = 0;
 };
 
 void Actions(Heap& heap, std::string& key_word) {

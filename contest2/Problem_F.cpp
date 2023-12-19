@@ -3,11 +3,30 @@
 #include <vector>
 
 class Heap {
- private:
-  std::vector<std::pair<long long, int>> heap_;
-  std::vector<int> sup_heap_;
-  int heap_length_ = 0;
+ public:
+  Heap(int heap_length) { sup_heap_.resize(heap_length + 1, -1); }
+  void ExtractMin() {
+    sup_heap_[heap_[heap_length_ - 1].second] = sup_heap_[heap_[0].second];
+    sup_heap_[heap_[0].second] = -1;
+    std::swap(heap_[0], heap_[heap_length_ - 1]);
 
+    heap_.pop_back();
+    heap_length_--;
+    SiftDown();
+  }
+  void GetMin() { std::cout << heap_[0].first << '\n'; }
+  void Insert(long long new_element, int request) {
+    heap_.emplace_back(new_element, request);
+    sup_heap_[request] = heap_length_;
+    heap_length_++;
+    SiftUp(heap_length_ - 1);
+  }
+  void DecreaseKey(long long value, int delta) {
+    heap_[sup_heap_[value]].first -= delta;
+    SiftUp(sup_heap_[value]);
+  }
+
+ private:
   void SiftDown() {
     int parent = 0;
     while (2 * parent + 1 < heap_length_) {
@@ -41,28 +60,9 @@ class Heap {
     }
   }
 
- public:
-  explicit Heap(int heap_length) { sup_heap_.resize(heap_length + 1, -1); }
-  void ExtractMin() {
-    sup_heap_[heap_[heap_length_ - 1].second] = sup_heap_[heap_[0].second];
-    sup_heap_[heap_[0].second] = -1;
-    std::swap(heap_[0], heap_[heap_length_ - 1]);
-
-    heap_.pop_back();
-    heap_length_--;
-    SiftDown();
-  }
-  void GetMin() { std::cout << heap_[0].first << '\n'; }
-  void Insert(long long new_element, int request) {
-    heap_.emplace_back(new_element, request);
-    sup_heap_[request] = heap_length_;
-    heap_length_++;
-    SiftUp(heap_length_ - 1);
-  }
-  void DecreaseKey(long long value, int delta) {
-    heap_[sup_heap_[value]].first -= delta;
-    SiftUp(sup_heap_[value]);
-  }
+  std::vector<std::pair<long long, int>> heap_;
+  std::vector<int> sup_heap_;
+  int heap_length_ = 0;
 };
 
 void Actions(Heap& heap, int request, std::string& key_word) {

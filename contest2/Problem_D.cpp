@@ -2,89 +2,91 @@
 #include <string>
 #include <vector>
 
-void EnqueueCase(std::vector<std::pair<int, int>>& input_stack,
-                 int new_element) {
-  int minimum = input_stack.empty()
-                    ? new_element
-                    : std::min(new_element, input_stack.back().second);
-  input_stack.emplace_back(new_element, minimum);
-  std::cout << "ok\n";
-}
-void DequeueAndFrontCase(std::vector<std::pair<int, int>>& input_stack,
-                         std::vector<std::pair<int, int>>& output_stack,
-                         bool is_dequeue) {
-  if (input_stack.empty() && output_stack.empty()) {
-    std::cout << "error\n";
-    return;
+class Deque {
+ public:
+  void EnqueueCase(int new_element) {
+    int minimum = input_stack_.empty()
+                      ? new_element
+                      : std::min(new_element, input_stack_.back().second);
+    input_stack_.emplace_back(new_element, minimum);
+    std::cout << "ok\n";
   }
-  if (output_stack.empty()) {
-    while (!input_stack.empty()) {
-      int element = input_stack.back().first;
-      input_stack.pop_back();
-      int minimum = output_stack.empty()
-                        ? element
-                        : std::min(element, output_stack.back().second);
-      output_stack.emplace_back(element, minimum);
+
+  void DequeueAndFrontCase(bool is_dequeue) {
+    if (input_stack_.empty() && output_stack_.empty()) {
+      std::cout << "error\n";
+      return;
+    }
+    if (output_stack_.empty()) {
+      while (!input_stack_.empty()) {
+        int element = input_stack_.back().first;
+        input_stack_.pop_back();
+        int minimum = output_stack_.empty()
+                          ? element
+                          : std::min(element, output_stack_.back().second);
+        output_stack_.emplace_back(element, minimum);
+      }
+    }
+    std::cout << output_stack_.back().first << '\n';
+    if (is_dequeue) {
+      output_stack_.pop_back();
     }
   }
-  std::cout << output_stack.back().first << '\n';
-  if (is_dequeue) {
-    output_stack.pop_back();
+  void GetMin() {
+    if (input_stack_.empty() && output_stack_.empty()) {
+      std::cout << "error\n";
+      return;
+    }
+    if (input_stack_.empty() || output_stack_.empty()) {
+      std::cout << (input_stack_.empty() ? output_stack_.back().second
+                                         : input_stack_.back().second)
+                << '\n';
+    } else {
+      std::cout << std::min(input_stack_.back().second,
+                            output_stack_.back().second)
+                << '\n';
+    }
   }
-}
-void GetMin(std::vector<std::pair<int, int>>& input_stack,
-            std::vector<std::pair<int, int>>& output_stack) {
-  if (input_stack.empty() && output_stack.empty()) {
-    std::cout << "error\n";
-    return;
+  void ClearCase() {
+    input_stack_.clear();
+    output_stack_.clear();
+    std::cout << "ok\n";
   }
-  if (input_stack.empty() || output_stack.empty()) {
-    std::cout << (input_stack.empty() ? output_stack.back().second
-                                      : input_stack.back().second)
-              << '\n';
-  } else {
-    std::cout << std::min(input_stack.back().second, output_stack.back().second)
-              << '\n';
-  }
-}
-void ClearCase(std::vector<std::pair<int, int>>& input_stack,
-               std::vector<std::pair<int, int>>& output_stack) {
-  input_stack.clear();
-  output_stack.clear();
-  std::cout << "ok\n";
-}
-void SizeCase(std::vector<std::pair<int, int>>& input_stack,
-              std::vector<std::pair<int, int>>& output_stack) {
-  std::cout << input_stack.size() + output_stack.size() << '\n';
-}
 
-void Actions(int requests_number, std::vector<std::pair<int, int>>& input_stack,
-             std::vector<std::pair<int, int>>& output_stack) {
+  void SizeCase() {
+    std::cout << input_stack_.size() + output_stack_.size() << '\n';
+  }
+
+ private:
+  std::vector<std::pair<int, int>> input_stack_;
+  std::vector<std::pair<int, int>> output_stack_;
+};
+
+void Actions(int requests_number) {
+  Deque deque;
   for (int i = 0; i < requests_number; ++i) {
     std::string key_word;
     std::cin >> key_word;
     if (key_word == "enqueue") {
       int new_element;
       std::cin >> new_element;
-      EnqueueCase(input_stack, new_element);
+      deque.EnqueueCase(new_element);
     } else if (key_word == "dequeue") {
-      DequeueAndFrontCase(input_stack, output_stack, true);
+      deque.DequeueAndFrontCase(true);
     } else if (key_word == "front") {
-      DequeueAndFrontCase(input_stack, output_stack, false);
+      deque.DequeueAndFrontCase(false);
     } else if (key_word == "size") {
-      SizeCase(input_stack, output_stack);
+      deque.SizeCase();
     } else if (key_word == "clear") {
-      ClearCase(input_stack, output_stack);
+      deque.ClearCase();
     } else if (key_word == "min") {
-      GetMin(input_stack, output_stack);
+      deque.GetMin();
     }
   }
 }
 
 int main() {
-  std::vector<std::pair<int, int>> input_stack;
-  std::vector<std::pair<int, int>> output_stack;
   int requests_number;
   std::cin >> requests_number;
-  Actions(requests_number, input_stack, output_stack);
+  Actions(requests_number);
 }

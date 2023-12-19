@@ -2,10 +2,6 @@
 #include <vector>
 
 class GoblinQueue {
- private:
-  int array_size_;
-  std::vector<int> goblins_;
-
  public:
   void PushBack(int& goblin) { goblins_.push_back(goblin); }
 
@@ -17,6 +13,10 @@ class GoblinQueue {
   int Front() { return goblins_.front(); }
 
   void PopFront() { goblins_.erase(goblins_.begin()); }
+
+ private:
+  int array_size_;
+  std::vector<int> goblins_;
 };
 
 void Actions(GoblinQueue goblin_queue, int requests_number) {
