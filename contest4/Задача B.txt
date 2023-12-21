@@ -1,0 +1,147 @@
+#include <iostream>
+#include <memory>
+#include <vector>
+const int kMod = 1000000000;
+
+struct Node {
+  int height, val;
+  std::shared_ptr<Node> left_child;
+  std::shared_ptr<Node> right_child;
+  Node(int value)
+      : height(1), val(value), left_child(nullptr), right_child(nullptr) {}
+};
+
+class AVLTree {
+ public:
+  AVLTree() : tree(nullptr) {}
+
+  void Add(int val) { Insert(tree, val); }
+  int Next(int val) { return MinVal(tree, val) ? MinVal(tree, val)->val : -1; }
+
+ private:
+  void Insert(std::shared_ptr<Node>& node, int val) {
+    if (!node) {
+      node = std::make_shared<Node>(val);
+      return;
+    }
+
+    if (val > node->val) {
+      Insert(node->right_child, val);
+    } else if (val < node->val) {
+      Insert(node->left_child, val);
+    } else {
+      return;
+    }
+
+    node->height =
+        1 + std::max(GetHeight(node->left_child), GetHeight(node->right_child));
+
+    if (GetDiff(node) == -2 && (GetDiff(node->right_child) <= 0)) {
+      node = LeftRotate(node);
+    } else if (GetDiff(node) == -2) {
+      node->right_child = RightRotate(node->right_child);
+      node = LeftRotate(node);
+    }
+
+    if (GetDiff(node) == 2 && (GetDiff(node->left_child) >= 0)) {
+      node = RightRotate(node);
+    } else if (GetDiff(node) == 2) {
+      node->left_child = LeftRotate(node->left_child);
+      node = RightRotate(node);
+    }
+  }
+
+  std::shared_ptr<Node> MinVal(std::shared_ptr<Node>& node, int key) {
+    if (node == nullptr) {
+      return nullptr;
+    }
+    if (node->val < key) {
+      return MinVal(node->right_child, key);
+    }
+    std::shared_ptr<Node> tmp = MinVal(node->left_child, key);
+    return tmp ? tmp : node;
+  }
+  static int GetHeight(std::shared_ptr<Node>& node) {
+    if (!node) {
+      return 0;
+    }
+    return node->height;
+  }
+
+  static int GetDiff(std::shared_ptr<Node>& node) {
+    if (!node) {
+      return 0;
+    }
+    return GetHeight(node->left_child) - GetHeight(node->right_child);
+  }
+
+  static std::shared_ptr<Node> RightRotate(std::shared_ptr<Node>& parent) {
+    std::shared_ptr<Node> sub_node = parent->left_child;
+    std::shared_ptr<Node> sub_tree = sub_node->right_child;
+    sub_node->right_child = parent;
+    parent->left_child = sub_tree;
+
+    parent->height = std::max(GetHeight(parent->left_child),
+                              GetHeight(parent->right_child)) +
+                     1;
+    sub_node->height = std::max(GetHeight(sub_node->left_child),
+                                GetHeight(sub_node->right_child)) +
+                       1;
+
+    return sub_node;
+  }
+
+  static std::shared_ptr<Node> LeftRotate(std::shared_ptr<Node>& parent) {
+    std::shared_ptr<Node> sub_node = parent->right_child;
+    std::shared_ptr<Node> sub_tree = sub_node->left_child;
+    sub_node->left_child = parent;
+    parent->right_child = sub_tree;
+
+    parent->height = std::max(GetHeight(parent->left_child),
+                              GetHeight(parent->right_child)) +
+                     1;
+    sub_node->height = std::max(GetHeight(sub_node->left_child),
+                                GetHeight(sub_node->right_child)) +
+                       1;
+
+    return sub_node;
+  }
+
+ public:
+  std::shared_ptr<Node> tree;
+};
+
+void Actions(int req_num) {
+  AVLTree tree;
+  char buffer = '+';
+  int buffer_res;
+  char sign;
+  for (int i = 0; i < req_num; ++i) {
+    std::cin >> sign;
+    if (sign == '+') {
+      if (buffer == '+') {
+        int new_element;
+        std::cin >> new_element;
+        tree.Add(new_element);
+      } else {
+        int new_element;
+        std::cin >> new_element;
+        new_element = (new_element + buffer_res) % kMod;
+        tree.Add(new_element);
+        buffer = '+';
+      }
+    } else if (sign == '?') {
+      int key;
+      std::cin >> key;
+      buffer_res = tree.Next(key);
+      buffer = '?';
+      std::cout << buffer_res << '\n';
+    }
+  }
+}
+
+int main() {
+  int req_num;
+  std::cin >> req_num;
+  Actions(req_num);
+}
