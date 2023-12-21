@@ -1,0 +1,91 @@
+#include <iostream>
+#include <memory>
+#include <vector>
+const int kMaxX = 1000000000;
+
+class CompressedSegmentTree {
+ public:
+  explicit CompressedSegmentTree(int size) : tree_(nullptr), size_(size) {}
+  long long GetSum(int ll, int rr) { return GetSum(tree_, 0, size_ - 1, ll, rr); }
+  void Update(int pos, int val) { Update(tree_, 0, size_ - 1, pos, val); }
+
+ private:
+  struct SegmentTree {
+    int t_left;
+    int t_right;
+    long long sum = 0;
+
+    std::shared_ptr<SegmentTree> left_child;
+    std::shared_ptr<SegmentTree> right_child;
+
+    SegmentTree(int tl, int tr)
+        : t_left(tl), t_right(tr), left_child(nullptr), right_child(nullptr){};
+  };
+
+  void Update(std::shared_ptr<SegmentTree>& node, int t_left, int t_right,
+              int pos, int val) {
+    if (!node) {
+      node = std::make_shared<SegmentTree>(t_left, t_right);
+    }
+    if (t_left == t_right) {
+      node->sum += val;
+      return;
+    }
+    int t_mid = (t_left + t_right) / 2;
+    if (pos <= t_mid) {
+      Update(node->left_child, t_left, t_mid, pos, val);
+    } else {
+      Update(node->right_child, t_mid + 1, t_right, pos, val);
+    }
+
+    long long sum = 0;
+    if (node->left_child != nullptr) {
+      sum += node->left_child->sum;
+    }
+    if (node->right_child != nullptr) {
+      sum += node->right_child->sum;
+    }
+    node->sum = sum;
+  }
+
+  long long GetSum(std::shared_ptr<SegmentTree>& node, int t_left, int t_right,
+                   int ll, int rr) {
+    if (t_left > rr || t_right < ll || !node) {
+      return 0;
+    }
+    if (ll <= t_left && rr >= t_right) {
+      return (node->sum);
+    }
+    int t_mid = (node->t_left + node->t_right) / 2;
+    return GetSum(node->left_child, t_left, t_mid, ll, std::min(rr, t_mid)) +
+        GetSum(node->right_child, t_mid + 1, t_right, std::max(ll, t_mid),
+               rr);
+  }
+
+ private:
+  std::shared_ptr<SegmentTree> tree_;
+  int size_;
+};
+
+int main() {
+  std::ios::sync_with_stdio(false);
+  std::cin.tie(nullptr);
+  std::cout.tie(nullptr);
+  int req_num;
+  std::cin >> req_num;
+  CompressedSegmentTree tree(kMaxX);
+
+  for (int i = 0; i < req_num; ++i) {
+    char request;
+    std::cin >> request;
+    if (request == '+') {
+      int x_val;
+      std::cin >> x_val;
+      tree.Update(x_val, x_val);
+    } else if (request == '?') {
+      int x_val;
+      std::cin >> x_val;
+      std::cout << tree.GetSum(0, x_val) << '\n';
+    }
+  }
+}
