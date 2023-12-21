@@ -1,0 +1,92 @@
+#include <iostream>
+#include <vector>
+
+class SparseTable {
+ public:
+  SparseTable(size_t size, std::vector<int>& arr) : size_(size) {
+    BuildSparse(arr);
+  }
+  void Get(int start, int end, std::vector<int>& arr) {
+    --start;
+    --end;
+    int pow = LessPowerOfTwo(end - start + 1);
+    Node left = table_[pow][start];
+    Node right = table_[pow][end - (1 << pow) + 1];
+    if (left.min_1 == right.min_1) {
+      std::cout << std::min(arr[left.min_2], arr[right.min_2]) << '\n';
+    } else if (arr[left.min_1] < arr[right.min_1]) {
+      std::cout << std::min(arr[left.min_2], arr[right.min_1]) << '\n';
+    } else {
+      std::cout << std::min(arr[right.min_2], arr[left.min_1]) << '\n';
+    }
+  }
+ private:
+  struct Node {
+    int min_1;
+    int min_2;
+  };
+
+  static int MinInd(int first, int second, std::vector<int>& arr) {
+    if (second == -1) {
+      return first;
+    }
+    if (arr[first] < arr[second]) {
+      return first;
+    }
+    return second;
+  }
+
+  static int LessPowerOfTwo(int val) {
+    int res = 0;
+    val >>= 1;
+    while (val > 0) {
+      val >>= 1;
+      res += 1;
+    }
+    return res;
+  }
+
+  void BuildSparse(std::vector<int>& arr) {
+    int pow = LessPowerOfTwo(size_) + 1;
+    table_.resize(pow);
+    table_[0].resize(size_);
+    for (size_t j = 0; j < size_; ++j) {
+      table_[0][j].min_1 = j;
+      table_[0][j].min_2 = -1;
+    }
+    for (int i = 1; i < pow; ++i) {
+      int cur_size = size_ - (1 << i) + 1;
+      table_[i].resize(cur_size);
+      for (int j = 0; j < cur_size; ++j) {
+        Node left = table_[i - 1][j];
+        Node right = table_[i - 1][j + (1 << (i - 1))];
+        if (arr[left.min_1] < arr[right.min_1]) {
+          table_[i][j].min_1 = left.min_1;
+          table_[i][j].min_2 = MinInd(right.min_1, left.min_2, arr);
+        } else {
+          table_[i][j].min_1 = right.min_1;
+          table_[i][j].min_2 = MinInd(left.min_1, right.min_2, arr);
+        }
+      }
+    }
+  }
+  std::vector<std::vector<Node>> table_;
+  size_t size_;
+};
+
+int main() {
+  int arr_size;
+  int req_size;
+  std::cin >> arr_size >> req_size;
+  std::vector<int> arr(arr_size);
+  for (int i = 0; i < arr_size; ++i) {
+    std::cin >> arr[i];
+  }
+  SparseTable table(arr_size, arr);
+  for (int i = 0; i < req_size; ++i) {
+    int left;
+    int right;
+    std::cin >> left >> right;
+    table.Get(left, right, arr);
+  }
+}
